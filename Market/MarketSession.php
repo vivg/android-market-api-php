@@ -1,6 +1,7 @@
 <?php
 /**
- * @author Niklas Nilsson <splitfeed@gmail.com>
+ * @modified by Vivek Gupta <mail@vivekgupta.com>
+ * @original author Niklas Nilsson <splitfeed@gmail.com>
  *
  *
  */
@@ -11,12 +12,12 @@ class MarketSession {
 	/**
 	 *
 	 */
-	function __construct () {
-		$this->context = new RequestContext();
-		$this->context->setUnknown1(0);
-		$this->context->setVersion(8013013);
-		$this->context->setDeviceAndSdkVersion("crespo:15");
+	function __construct ($isSecure=FALSE) {
 
+		$this->context = new RequestContext();
+		$this->context->setVersion(2009011);
+		$this->context->setDeviceAndSdkVersion("crespo:15");
+		$this->context->setIsSecure($isSecure);
 		$this->context->setUserLanguage("en");
 		$this->context->setUserCountry("US");
 
@@ -60,6 +61,10 @@ class MarketSession {
 		}
 	}
 
+	public function setIsSecure($isSecure) {
+		$this->context->setIsSecure(isSecure);
+	}
+
 	/**
 	 *
 	 * @param unknown_type $email
@@ -69,7 +74,7 @@ class MarketSession {
 		$postFields	= array(
 			"Email"			=> $email,
 			"Passwd"		=> $password,
-			"service"		=> "android",
+			"service"		=> $this->context->getIsSecure() ? "androidsecure" : "android" ,
 			"accountType"	=> "GOOGLE",
 		);
 		$post = "";
@@ -202,6 +207,7 @@ class MarketSession {
 		curl_setopt($ch, CURLOPT_USERAGENT, "Android-Finsky/3.7.13 (api=3,versionCode=8013013,sdk=15,device=crespo,hardware=herring,product=soju)");
 		
 		$post = "version=2&request=".base64_encode($request);
+		
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
 
 		$headers = array(

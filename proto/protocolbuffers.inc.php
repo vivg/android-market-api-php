@@ -137,8 +137,12 @@ class Protobuf {
 		if ($limit !== null)
 			$limit -= $len;
 
-		$i = 0.0;
-		for ($j = $len-1; $j >= 0; $j--)$i = $i * 128 + (ord($value[$j]) & 0x7F);
+		$i = 0;
+		$shift = 0;
+		for ($j = 0; $j < $len; $j++) {
+			$i |= ((ord($value[$j]) & 0x7F) << $shift);
+			$shift += 7;
+		}
 
 		return $i;
 	}
@@ -251,9 +255,8 @@ class Protobuf {
 				$len = Protobuf::read_varint($fp, $limit);
 				$limit -= $len;
 				return fread($fp, $len);
+
 			//case 3: // Start group TODO we must keep looping until we find the closing end grou
-			case (3||4||7):
-				return null;
 
 			//case 4: // End group - We should never skip a end group!
 			//	return 0; // Do nothing
@@ -299,7 +302,7 @@ class Protobuf {
 				}
 
 				$ret .= '"' . $safevalue . '" (' . strlen($value) . " bytes)\n";
-
+				
 			} elseif (is_bool($value)) {
 				$ret .= ($value ? 'true' : 'false') . "\n";
 			} else {
